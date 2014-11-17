@@ -52,7 +52,7 @@ module.exports = function(grunt) {
 					ext: 'js,html',
 					watch: [ 'dist/' ], 
 					env: {
-						NODE_PATH: './server'
+						NODE_PATH: './modules'
 					}
 				}
 			}

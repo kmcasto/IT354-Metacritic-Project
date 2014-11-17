@@ -2,6 +2,7 @@ var http = require('http');
 var https = require('https');
 var fs = require('fs');
 var internalIP = require('internal-ip');
+var user = require('user');
 
 var serverBacklog = 511;
 var serverPort = 1337;
