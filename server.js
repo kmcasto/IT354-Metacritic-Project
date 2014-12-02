@@ -122,7 +122,7 @@ app.get('/content', function(request, response) {
 });
 
 app.get('/games', function(request, response) {
-	
+	getMetacriticGames(response);
 });
 
 mongoose.connect(mongoURL, mongooseOptions, function(error, res) {
