@@ -3,10 +3,37 @@
 var path = require('path');
 var fs = require('fs');
 var express = require('express');
+var mongoose = require('mongoose');
+var http = require('http');
+
 var app = express();
 
-
 var serverPort = 1337;
+
+/** URL of the MongoDB database server. */
+var mongoURL = "mongodb://127.0.0.1/IT354-Metacritic-Project";
+
+// Hardcoded for now, will be replaced with the actual ID of user when login is working.
+var userID = 210;
+
+var mongooseOptions = { safe: true };
+
+/**
+ * Database Schema for storing a users platforms and games.
+ */
+var Schema = new mongoose.Schema({
+	id: mongoose.Schema.Types.ObjectId,
+	platforms: [String], 
+	games: [{ 
+		title: String, 
+		link: String, 
+		platform: String 
+	}]
+});
+
+
+var User = mongoose.model("Model", Schema);
+
 
 /**
  * Send a file to the client.
@@ -23,60 +50,119 @@ function sendFile(filename, request, response) {
 
 	response.sendFile(filename, options, function(error) {
 		if(error) {
-			//console.log(error);
 			response.status(error.status).end();
-		} else {
-			//console.log('Sent:', filename);
 		}
 	});
 }
 
 /**
- * Send /index.html
+ * @brief Serve '/index.html' whenever URL is '/'.
  */
 app.get('/', function(request, response) {
 	sendFile("/index.html", request, response);
 });
 
+/**
+ * @brief Serve any file that exists in 'dist/' (Compressed version of 'public/')
+ */
 app.get('*', function(request, response) {
 	sendFile(request.url, request, response);
 });
 
-var server = app.listen(serverPort, function() {
-	var host = server.address().address;
-	var port = server.address().port;
-
-	console.log('Server running at http://%s:%s', host, port);
+/**
+ * @brief Process a request to create a new user.
+ * @todo app.post('/register') is just a stub for right now.
+ */
+app.post('/register', function(request, response) { 
 });
 
-
-
-/*
-var http = require('http');
-var https = require('https');
-var fs = require('fs');
-var internalIP = require('internal-ip');
-var user = require('user');
-
-var serverBacklog = 511;
-var serverPort = 1337;
-var serverIP = internalIP();
-
-var options = {
-	key: fs.readFileSync('server-key.pem'), 
-	cert: fs.readFileSync('server-cert.pem')
-};
-
-var https_server = https.createServer(options, function(req, res) {
-	console.log("URL = " + req.url);
-
-	res.writeHead(200, { 'Content-Type': 'text/html' });
-	res.write("<html><body><h3>It Works</h3></body></html>");
-	res.end();
+/**
+ * @brief Process a login request.
+ * @todo app.post('/login') is just a stub for right now.
+ */
+app.post('/login', function(request, response) { 
 });
 
-https_server.listen(serverPort, function() {
-	console.log("Server running on " + "https://" + serverIP + ":" + serverPort + "/");
+/**
+ * @brief Add a platform to the users list of platforms.
+ * @todo app.post('/add') is just a stub for right now.
+ */
+app.post('/add', function(request, response) { 
+	var platform = request.body.platform;
+
+
+	Model.findByIdAndUpdate(userID, { $push: { platforms: platform } }, function(error, userdata) {
+		if(error) {
+			response.send(error);
+			// console.log(error);
+			throw error;
+		}
+
+		console.log("  User Data: ");
+		console.log(userdata);
+
+		userdata.save(function(error) {
+			if(error) {
+				response.send(error);
+				// console.log(error);
+				throw error;
+			}
+
+			response.send(userdata.platforms);
+		});
+
+	});
 });
-*/
+
+/**
+ * @brief 
+ */
+app.get('/content', function(request, response) {
+	
+});
+
+app.get('/games', function(request, response) {
+	
+});
+
+mongoose.connect(mongoURL, mongooseOptions, function(error, res) {
+	if(error) {
+		throw error;
+	} else {
+		var server = app.listen(serverPort, function() {
+			var host = server.address().address;
+			var port = server.address().port;
+
+			console.log('Server running at http://%s:%s', host, port);
+		});
+	}
+});
+
+function getMetacriticGames(browser_response) {
+	var options = {
+		host: "www.metacritic.com",
+		path: "/browse/games/release-date/available/ps4/name"
+	};
+
+	var req = http.request(options, function(response) {
+		var content = "";
+
+		// Received a chunk of data.
+		response.on("data", function(chunk) {
+			content += chunk;
+		});
+
+		// Data has ended
+		response.on("end", function() {
+			//console.log(content);
+
+			// Send the HTML from the metacritic page to the browser.
+			// In the future, I will download all games for all of users
+			// platforms, and parse the list on the server.
+			browser_response.send(content);
+		});
+	});
+	req.end();
+}
+
 

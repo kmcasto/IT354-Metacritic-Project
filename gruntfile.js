@@ -38,7 +38,16 @@ module.exports = function(grunt) {
 							'bower_components/bootstrap/dist/css/bootstrap.min.css' 
 						], 
 						dest: 'dist/css/' 
-					} 
+					}, 
+					{
+						expand: true, 
+						flatten: true, 
+						src: [ 
+							"bower_components/jquery/dist/jquery.min.js", 
+							"bower_components/jquery/dist/jquery.min.map"
+						], 
+						dest: "dist/js/"
+					}
 				] 
 			} 
 		}, 
