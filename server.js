@@ -94,7 +94,7 @@ app.post("/add/platform/:platform_id", limiter.middleware(), function(request, r
 
 	logger.info("Adding " + platform + " to users list of platform");
 
-	Model.findByIdAndUpdate(userID, { $push: { platforms: platform } }, function(error, userdata) {
+	User.findByIdAndUpdate(userID, { $push: { platforms: platform } }, function(error, userdata) {
 		if(error) {
 			logger.error("Error adding " + platform + " to users list of platform");
 			response.send(error);
@@ -129,7 +129,7 @@ app.post("/add/games/:game_id", limiter.middleware(), function(request, response
  */
 app.get("/get/platforms/:platform_id", limiter.middleware(), function(request, response) { 
 
-	Model.findById(userID , function(error, userdata) {
+	User.findById(userID , function(error, userdata) {
 		if(error) {
 			logger.error("Error finding user by ID: " + error);
 			response.send(error);
@@ -149,7 +149,7 @@ app.post("/delete/platform/:platform_id", limiter.middleware(), function(request
 
 	logger.info("Removing " + platform + " from users list of platform");
 
-	Model.findByIdAndUpdate(userID, { $pull: { platforms: platform } }, function(error, userdata) {
+	User.findByIdAndUpdate(userID, { $pull: { platforms: platform } }, function(error, userdata) {
 		if(error) {
 			logger.error("Error removing " + platform + " from users list of platform: " + error);
 			response.send(error);
