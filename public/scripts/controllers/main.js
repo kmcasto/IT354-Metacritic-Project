@@ -8,10 +8,22 @@
  * Controller of the angularDemoApp
  */
 angular.module('metacriticApp')
-  .controller('MainCtrl', function ($scope) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
-  });
+  .controller('MainCtrl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+			
+			console.log('in controller');
+			
+			$http.get('/add/platform/5').
+				  success(function(data) {
+					// this callback will be called asynchronously
+					console.log('success');
+					// when the response is available
+				  }).
+				  error(function(data) {
+					// called asynchronously if an error occurs
+					console.log('fail');
+					// or server returns response with an error status.
+				  });
+			
+			
+		
+  }]);
