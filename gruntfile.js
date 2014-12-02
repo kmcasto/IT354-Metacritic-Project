@@ -231,7 +231,6 @@ module.exports = function (grunt) {
         }
       }
     },
->>>>>>> 63e5a135281005427e42e5c1b4bf590ea4bcb4d8
 
     // Performs rewrites based on filerev and the useminPrepare configuration
     usemin: {
