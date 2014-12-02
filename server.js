@@ -1,13 +1,13 @@
-'use strict';
+"use strict";
 
-var path = require('path');
-var fs = require('fs');
-var express = require('express');
-var mongoose = require('mongoose');
-var http = require('http');
+var path = require("path");
+var fs = require("fs");
+var express = require("express");
+var mongoose = require("mongoose");
+var http = require("http");
 
-var Limiter = require('express-rate-limiter');
-var MemoryStore = require('express-rate-limiter/lib/memoryStore');
+var Limiter = require("express-rate-limiter");
+var MemoryStore = require("express-rate-limiter/lib/memoryStore");
 var limiter = new Limiter({ db : new MemoryStore() });
 
 var app = express();
@@ -44,11 +44,11 @@ var User = mongoose.model("Model", Schema);
  */
 function sendFile(filename, request, response) {
 	var options = {
-		root: __dirname + '/dist/',
-		dotfiles: 'deny',
+		root: __dirname + "/dist/",
+		dotfiles: "deny",
 		headers: {
-			'x-timestamp': Date.now(),
-			'x-sent': true
+			"x-timestamp": Date.now(),
+			"x-sent": true
 		}
 	};
 
@@ -62,14 +62,14 @@ function sendFile(filename, request, response) {
 /**
  * @brief Serve '/index.html' whenever URL is '/'.
  */
-app.get('/', limiter.middleware(), function(request, response) {
+app.get("/", limiter.middleware(), function(request, response) {
 	sendFile("/index.html", request, response);
 });
 
 /**
  * @brief Serve any file that exists in 'dist/' (Compressed version of 'public/')
  */
-app.get('*', limiter.middleware(), function(request, response) {
+app.get("*", limiter.middleware(), function(request, response) {
 	sendFile(request.url, request, response);
 });
 
@@ -77,22 +77,21 @@ app.get('*', limiter.middleware(), function(request, response) {
  * @brief Process a request to create a new user.
  * @todo app.post('/register') is just a stub for right now.
  */
-app.post('/register', limiter.middleware(), function(request, response) { 
+app.post("/register", limiter.middleware(), function(request, response) { 
 });
 
 /**
  * @brief Process a login request.
  * @todo app.post('/login') is just a stub for right now.
  */
-app.post('/login', limiter.middleware(), function(request, response) { 
+app.post("/login", limiter.middleware(), function(request, response) { 
 });
 
 /**
  * @brief Add a platform to the users list of platforms.
- * @todo app.post('/add') is just a stub for right now.
  */
-app.post('/add', limiter.middleware(), function(request, response) { 
-	var platform = request.body.platform;
+app.post("/add/platform/:platform_id", limiter.middleware(), function(request, response) { 
+	var platform = request.params.platform;
 
 
 	Model.findByIdAndUpdate(userID, { $push: { platforms: platform } }, function(error, userdata) {
@@ -118,6 +117,43 @@ app.post('/add', limiter.middleware(), function(request, response) {
 	});
 });
 
+/**
+ * @brief Add a Game to the list of games the user likes
+ */
+app.post("/add/games/:game_id", limiter.middleware(), function(request, response) { 
+
+});
+
+/**
+ * @brief Delete a platform from the users list of platforms.
+ */
+app.post("/delete/platform/:platform_id", limiter.middleware(), function(request, response) { 
+	var platform = request.params.platform;
+
+	Model.findByIdAndUpdate(userID, { $pull: { platforms: platform } }, function(error, userdata) {
+		if(error) {
+			response.send(error);
+			// console.log(error);
+			throw error;
+		}
+
+		console.log("  User Data: ");
+		console.log(userdata);
+
+		userdata.save(function(error) {
+			if(error) {
+				response.send(error);
+				// console.log(error);
+				throw error;
+			}
+
+			response.send(userdata.platforms);
+		});
+
+	});
+
+});
+
 mongoose.connect(mongoURL, mongooseOptions, function(error, res) {
 	if(error) {
 		throw error;
@@ -126,7 +162,7 @@ mongoose.connect(mongoURL, mongooseOptions, function(error, res) {
 			var host = server.address().address;
 			var port = server.address().port;
 
-			console.log('Server running at http://%s:%s', host, port);
+			console.log("Server running at http://%s:%s", host, port);
 		});
 	}
 });
