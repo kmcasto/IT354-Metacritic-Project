@@ -6,6 +6,10 @@ var express = require('express');
 var mongoose = require('mongoose');
 var http = require('http');
 
+var Limiter = require('express-rate-limiter');
+var MemoryStore = require('express-rate-limiter/lib/memoryStore');
+var limiter = new Limiter({ db : new MemoryStore() });
+
 var app = express();
 
 var serverPort = 1337;
@@ -58,14 +62,14 @@ function sendFile(filename, request, response) {
 /**
  * @brief Serve '/index.html' whenever URL is '/'.
  */
-app.get('/', function(request, response) {
+app.get('/', limiter.middleware(), function(request, response) {
 	sendFile("/index.html", request, response);
 });
 
 /**
  * @brief Serve any file that exists in 'dist/' (Compressed version of 'public/')
  */
-app.get('*', function(request, response) {
+app.get('*', limiter.middleware(), function(request, response) {
 	sendFile(request.url, request, response);
 });
 
@@ -73,21 +77,21 @@ app.get('*', function(request, response) {
  * @brief Process a request to create a new user.
  * @todo app.post('/register') is just a stub for right now.
  */
-app.post('/register', function(request, response) { 
+app.post('/register', limiter.middleware(), function(request, response) { 
 });
 
 /**
  * @brief Process a login request.
  * @todo app.post('/login') is just a stub for right now.
  */
-app.post('/login', function(request, response) { 
+app.post('/login', limiter.middleware(), function(request, response) { 
 });
 
 /**
  * @brief Add a platform to the users list of platforms.
  * @todo app.post('/add') is just a stub for right now.
  */
-app.post('/add', function(request, response) { 
+app.post('/add', limiter.middleware(), function(request, response) { 
 	var platform = request.body.platform;
 
 
