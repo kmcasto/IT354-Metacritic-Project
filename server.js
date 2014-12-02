@@ -36,7 +36,11 @@ var mongooseOptions = { safe: true };
  * Database Schema for storing a users platforms and games.
  */
 var Schema = new mongoose.Schema({
-	id: mongoose.Schema.Types.ObjectId,
+	username: { 
+		type: String, 
+		required: true, 
+		unique: true 
+	}, 
 	platforms: [String], 
 	games: [{ 
 		title: String, 
@@ -45,6 +49,7 @@ var Schema = new mongoose.Schema({
 	}]
 });
 
+Schema.set("autoIndex", false);
 
 var User = mongoose.model("Model", Schema);
 
@@ -94,7 +99,8 @@ app.post("/add/platform/:platform_id", limiter.middleware(), function(request, r
 
 	logger.info("Adding " + platform + " to users list of platform");
 
-	User.findByIdAndUpdate(userID, { $push: { platforms: platform } }, function(error, userdata) {
+
+	User.findOneAndUpdate({ id: userID }, { $push: { platforms: platform } }, function(error, userdata) {
 		if(error) {
 			logger.error("Error adding " + platform + " to users list of platform");
 			response.send(error);
@@ -129,16 +135,34 @@ app.post("/add/games/:game_id", limiter.middleware(), function(request, response
  */
 app.get("/get/platforms/:platform_id", limiter.middleware(), function(request, response) { 
 
-	User.findById(userID , function(error, userdata) {
+
+	User.findOne({ username: "Alex" }, function(error, user) {
 		if(error) {
-			logger.error("Error finding user by ID: " + error);
-			response.send(error);
-		} else {
-			return response.json(userdata.platforms);
+			console.log(error);
+			response.status(401).send(error);
+		} else if(user) {
+			// User exists already
+			//res.status(409).send("Conflict: username already exists");
+
+			return response.json(newUser.platforms);
+		} else if(user == undefined) {
+			// User does not exist already
+			var newUser = new User({
+				username : "Alex",
+			});
+
+			newUser.save(function(error) {
+				if(error) {
+					console.log(error);
+					response.status(500).send("Internal Server Error - Saving user to MongoDB");
+				} else {
+					//return response.status(200).send("New user saved to DB ok");
+					return response.json(newUser.platforms);
+				}
+			});	
 		}
+
 	});
-
-
 });
 
 /**

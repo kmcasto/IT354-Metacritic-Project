@@ -16,6 +16,7 @@ angular.module('metacriticApp')
 				  success(function(data) {
 					// this callback will be called asynchronously
 					console.log('success');
+					console.log(data);
 					// when the response is available
 				  }).
 				  error(function(data) {
