@@ -1,6 +1,7 @@
 var gulp = require("gulp");
 var uglify = require("gulp-uglify");
 var sass = require("gulp-sass");
+var nodemon = require("gulp-nodemon");
 
 gulp.task("javascript", function() {
 	/* Copy our scripts */
@@ -71,7 +72,15 @@ gulp.task("html", function() {
 	]).pipe(gulp.dest("dist"));
 });
 
-gulp.task("default", [ "javascript", "css", "html" ], function() {
+gulp.task("run", [ "javascript", "css", "html" ], function() {
+	var monitor = nodemon({ 
+		script: "server.js", 
+		ignore: [ "**" ] 
+	});
 
-});
+	//monitor.on("change", [ "javascript", "css", "html" ]);
+})
+
+gulp.task("default", [ "javascript", "css", "html" ]);
+
 
