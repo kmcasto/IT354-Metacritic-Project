@@ -12,7 +12,7 @@ angular.module('metacriticApp')
 			
 			console.log('in controller');
 			
-			$http.get('/add/platform/5').
+			$http.get('/get/platforms/5').
 				  success(function(data) {
 					// this callback will be called asynchronously
 					console.log('success');

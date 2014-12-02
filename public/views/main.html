@@ -1,7 +1,32 @@
 <div class="row marketing">
- 	<div class="container">
- 		<h3>Hello World</h3>
- 	</div>
- 
- 	<div id="gamesTable"></div>
+	  <h2>Games Search</h2>
+	  <form id="game-search" ng-submit="gameSearch()">
+			<label ng-repeat="system in systems">
+			  <input
+				type="checkbox"
+				name="selectedSystems[]"
+				value="{{system.name}}"
+				ng-model="system.selected"
+			  > {{system.name}}
+			</label>
+			
+	  </form>
+	  
+	<!--
+	  <div ng-repeat="game in gameResults | orderBy:'name':false">
+		<h2 ng-bind="game.name"> </h2>
+		<ul>
+			<li ng-bind="game.score">N/A</li>
+		</ul>
+	  </div>
+	  
+
+	  <div ng-repeat="movie in movieResults | orderBy:'year':true">
+		<img ng-src="{{movie.posters.detailed}}">
+		<h2 ng-bind="movie.title"> </h2>
+		<span ng-bind="movie.year"></span>
+		<p ng-bind="movie.synopsis"></p>
+		<p><a ng-href="/#/movies/reviews/{{movie.id}}">Reviews</a></p>
+	  </div>
+	  -->
 </div>
