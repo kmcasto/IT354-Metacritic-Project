@@ -99,28 +99,30 @@ app.post("/add/platform/:platform_id", limiter.middleware(), function(request, r
 
 	logger.info("Adding " + platform + " to users list of platform");
 
-
-	User.findOneAndUpdate({ id: userID }, { $push: { platforms: platform } }, function(error, userdata) {
+	User.findOneAndUpdate({ username: "Alex" }, { $push: { platforms: platform } }, function(error, user) {
 		if(error) {
 			logger.error("Error adding " + platform + " to users list of platform");
-			response.send(error);
-			throw error;
+			response.status(401).send(error);
+		} else if(user) {
+			return response.json(user.platforms);
+		} else if(user == undefined) {
+			// User does not exist already
+			var newUser = new User({
+				username : "Alex",
+			});
+
+			newUser.save(function(error) {
+				if(error) {
+					console.log(error);
+					response.status(500).send("Internal Server Error - Saving user to MongoDB");
+				} else {
+					return response.json(newUser.platforms);
+				}
+			});	
 		}
 
-		console.log("  User Data: ");
-		console.log(userdata);
-
-		userdata.save(function(error) {
-			if(error) {
-				logger.error("Error saving changes to MongoDB: " + error);
-				response.send(error);
-				throw error;
-			}
-
-			response.send(userdata.platforms);
-		});
-
 	});
+
 });
 
 /**
@@ -134,8 +136,6 @@ app.post("/add/games/:game_id", limiter.middleware(), function(request, response
  * @brief Add a Game to the list of games the user likes
  */
 app.get("/get/platforms/:platform_id", limiter.middleware(), function(request, response) { 
-
-
 	User.findOne({ username: "Alex" }, function(error, user) {
 		if(error) {
 			console.log(error);
@@ -144,7 +144,7 @@ app.get("/get/platforms/:platform_id", limiter.middleware(), function(request, r
 			// User exists already
 			//res.status(409).send("Conflict: username already exists");
 
-			return response.json(newUser.platforms);
+			return response.json(user.platforms);
 		} else if(user == undefined) {
 			// User does not exist already
 			var newUser = new User({
