@@ -73,20 +73,6 @@ function sendFile(filename, request, response) {
 }
 
 /**
- * @brief Serve '/index.html' whenever URL is '/'.
- */
-app.get("/", function(request, response) {
-	sendFile("/index.html", request, response);
-});
-
-/**
- * @brief Serve any file that exists in 'dist/' (Compressed version of 'public/')
- */
-app.get("*", function(request, response) {
-	sendFile(request.url, request, response);
-});
-
-/**
  * @brief Process a request to create a new user.
  * @todo app.post('/register') is just a stub for right now.
  */
@@ -139,6 +125,23 @@ app.post("/add/games/:game_id", limiter.middleware(), function(request, response
 });
 
 /**
+ * @brief Add a Game to the list of games the user likes
+ */
+app.get("/get/platforms/:platform_id", limiter.middleware(), function(request, response) { 
+
+	Model.findById(userID , function(error, userdata) {
+		if(error) {
+			logger.error("Error finding user by ID: " + error);
+			response.send(error);
+		} else {
+			return response.json(userdata.platforms);
+		}
+	});
+
+
+});
+
+/**
  * @brief Delete a platform from the users list of platforms.
  */
 app.post("/delete/platform/:platform_id", limiter.middleware(), function(request, response) { 
@@ -169,6 +172,26 @@ app.post("/delete/platform/:platform_id", limiter.middleware(), function(request
 	});
 
 });
+
+
+
+
+
+/**
+ * @brief Serve '/index.html' whenever URL is '/'.
+ */
+app.get("/", function(request, response) {
+	sendFile("/index.html", request, response);
+});
+
+
+/**
+ * @brief Serve any file that exists in 'dist/' (Compressed version of 'public/')
+ */
+app.get("*", function(request, response) {
+	sendFile(request.url, request, response);
+});
+
 
 mongoose.connect(mongoURL, mongooseOptions, function(error, res) {
 	if(error) {
