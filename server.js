@@ -5,17 +5,27 @@ var fs = require("fs");
 var express = require("express");
 var mongoose = require("mongoose");
 var http = require("http");
+var winston = require("winston");
 
 var Limiter = require("express-rate-limiter");
 var MemoryStore = require("express-rate-limiter/lib/memoryStore");
 var limiter = new Limiter({ db : new MemoryStore() });
 
+
+var logger = new (winston.Logger)({
+	transports: [
+		new (winston.transports.File)({ filename: "server.log" })
+	]
+});
+
 var app = express();
 
 var serverPort = 1337;
+logger.info("Server will be running on port: " + serverPort);
 
 /** URL of the MongoDB database server. */
 var mongoURL = "mongodb://127.0.0.1/IT354-Metacritic-Project";
+logger.info("Mongo Database URL is " + mongoURL);
 
 // Hardcoded for now, will be replaced with the actual ID of user when login is working.
 var userID = 210;
@@ -52,8 +62,11 @@ function sendFile(filename, request, response) {
 		}
 	};
 
+	logger.info("Sending " + filename + " to client");
+
 	response.sendFile(filename, options, function(error) {
 		if(error) {
+			logger.error("Error sending " + filename + " to client: " + error);
 			response.status(error.status).end();
 		}
 	});
@@ -62,14 +75,14 @@ function sendFile(filename, request, response) {
 /**
  * @brief Serve '/index.html' whenever URL is '/'.
  */
-app.get("/", limiter.middleware(), function(request, response) {
+app.get("/", function(request, response) {
 	sendFile("/index.html", request, response);
 });
 
 /**
  * @brief Serve any file that exists in 'dist/' (Compressed version of 'public/')
  */
-app.get("*", limiter.middleware(), function(request, response) {
+app.get("*", function(request, response) {
 	sendFile(request.url, request, response);
 });
 
@@ -93,11 +106,12 @@ app.post("/login", limiter.middleware(), function(request, response) {
 app.post("/add/platform/:platform_id", limiter.middleware(), function(request, response) { 
 	var platform = request.params.platform;
 
+	logger.info("Adding " + platform + " to users list of platform");
 
 	Model.findByIdAndUpdate(userID, { $push: { platforms: platform } }, function(error, userdata) {
 		if(error) {
+			logger.error("Error adding " + platform + " to users list of platform");
 			response.send(error);
-			// console.log(error);
 			throw error;
 		}
 
@@ -106,8 +120,8 @@ app.post("/add/platform/:platform_id", limiter.middleware(), function(request, r
 
 		userdata.save(function(error) {
 			if(error) {
+				logger.error("Error saving changes to MongoDB: " + error);
 				response.send(error);
-				// console.log(error);
 				throw error;
 			}
 
@@ -130,10 +144,12 @@ app.post("/add/games/:game_id", limiter.middleware(), function(request, response
 app.post("/delete/platform/:platform_id", limiter.middleware(), function(request, response) { 
 	var platform = request.params.platform;
 
+	logger.info("Removing " + platform + " from users list of platform");
+
 	Model.findByIdAndUpdate(userID, { $pull: { platforms: platform } }, function(error, userdata) {
 		if(error) {
+			logger.error("Error removing " + platform + " from users list of platform: " + error);
 			response.send(error);
-			// console.log(error);
 			throw error;
 		}
 
@@ -142,8 +158,8 @@ app.post("/delete/platform/:platform_id", limiter.middleware(), function(request
 
 		userdata.save(function(error) {
 			if(error) {
+				logger.error("Error saving changes to MongoDB: " + error);
 				response.send(error);
-				// console.log(error);
 				throw error;
 			}
 
@@ -163,6 +179,8 @@ mongoose.connect(mongoURL, mongooseOptions, function(error, res) {
 			var port = server.address().port;
 
 			console.log("Server running at http://%s:%s", host, port);
+
+			logger.info("Server running at http://" + host + ":" + port);
 		});
 	}
 });

@@ -19,7 +19,8 @@
 		"mongoose": "3.8.19", 
 		"express": "~4.10.2", 
 		"gulp": "~3.8.10", 
-		"express-rate-limiter": "~1.0.1" 
+		"express-rate-limiter": "~1.0.1", 
+		"winston": "~0.8.3"
 	},
 	"devDependencies": {
 		"gulp-uglify": "~1.0.1", 
