@@ -114,17 +114,6 @@ app.post('/add', function(request, response) {
 	});
 });
 
-/**
- * @brief 
- */
-app.get('/content', function(request, response) {
-	
-});
-
-app.get('/games', function(request, response) {
-	getMetacriticGames(response);
-});
-
 mongoose.connect(mongoURL, mongooseOptions, function(error, res) {
 	if(error) {
 		throw error;
@@ -137,32 +126,4 @@ mongoose.connect(mongoURL, mongooseOptions, function(error, res) {
 		});
 	}
 });
-
-function getMetacriticGames(browser_response) {
-	var options = {
-		host: "www.metacritic.com",
-		path: "/browse/games/release-date/available/ps4/name"
-	};
-
-	var req = http.request(options, function(response) {
-		var content = "";
-
-		// Received a chunk of data.
-		response.on("data", function(chunk) {
-			content += chunk;
-		});
-
-		// Data has ended
-		response.on("end", function() {
-			//console.log(content);
-
-			// Send the HTML from the metacritic page to the browser.
-			// In the future, I will download all games for all of users
-			// platforms, and parse the list on the server.
-			browser_response.send(content);
-		});
-	});
-	req.end();
-}
-
 

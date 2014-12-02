@@ -75,10 +75,10 @@ gulp.task("html", function() {
 gulp.task("run", [ "javascript", "css", "html" ], function() {
 	var monitor = nodemon({ 
 		script: "server.js", 
-		ignore: [ "**" ] 
+		ignore: [ "node_modules/", "bower_components/", "dist/" ] 
 	});
 
-	//monitor.on("change", [ "javascript", "css", "html" ]);
+	monitor.on("change", [ "javascript", "css", "html" ]);
 })
 
 gulp.task("default", [ "javascript", "css", "html" ]);
